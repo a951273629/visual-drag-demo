@@ -1,43 +1,49 @@
 <template>
     <div>
         <div class="toolbar">
-            <el-button @click="handleAceEditorChange">JSON</el-button>
-            <el-button @click="undo">撤消</el-button>
-            <el-button @click="redo">重做</el-button>
+            <el-button type="primary" @click="handleAceEditorChange">JSON</el-button>
+            <el-button type="primary" @click="undo">撤消</el-button>
+            <el-button type="primary" @click="redo">重做</el-button>
             <label for="input" class="insert">
                 插入图片
-                <input
-                    id="input"
-                    type="file"
-                    hidden
-                    @change="handleFileChange"
-                />
+                <input id="input" type="file" hidden @change="handleFileChange" />
             </label>
 
-            <el-button style="margin-left: 10px;" @click="preview(false)">预览</el-button>
-            <el-button @click="save">保存</el-button>
-            <el-button @click="clearCanvas">清空画布</el-button>
-            <el-button :disabled="!areaData.components.length" @click="compose">组合</el-button>
+            <el-button type="primary" style="margin-left: 10px" @click="preview(false)">预览</el-button>
+            <el-button type="primary" @click="save">保存</el-button>
+            <el-button type="primary" @click="clearCanvas">清空画布</el-button>
+            <el-button type="primary" :disabled="!areaData.components.length" @click="compose">组合</el-button>
             <el-button
+                type="primary"
                 :disabled="!curComponent || curComponent.isLock || curComponent.component != 'Group'"
                 @click="decompose"
             >
                 拆分
             </el-button>
 
-            <el-button :disabled="!curComponent || curComponent.isLock" @click="lock">锁定</el-button>
-            <el-button :disabled="!curComponent || !curComponent.isLock" @click="unlock">解锁</el-button>
-            <el-button @click="preview(true)">截图</el-button>
+            <el-button type="primary" :disabled="!curComponent || curComponent.isLock" @click="lock">锁定</el-button>
+            <el-button type="primary" :disabled="!curComponent || !curComponent.isLock" @click="unlock">解锁</el-button>
+            <el-button type="primary" @click="preview(true)">截图</el-button>
+
+            <!-- 选择屏幕按钮 -->
+            <el-dropdown class="dropdown" size="small" split-button type="primary" @command="screenCategory">
+                {{ screenName }}
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="phone">手机屏幕</el-dropdown-item>
+                    <el-dropdown-item command="pc">电脑屏幕</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
 
             <div class="canvas-config">
                 <span>画布大小</span>
-                <input v-model="canvasStyleData.width">
+                <input v-model="canvasStyleData.width" />
                 <span>*</span>
-                <input v-model="canvasStyleData.height">
+                <input v-model="canvasStyleData.height" />
             </div>
             <div class="canvas-config">
                 <span>画布比例</span>
-                <input v-model="scale" @input="handleScaleChange"> %
+                <input v-model="scale" @input="handleScaleChange" />
+                %
             </div>
         </div>
 
@@ -67,20 +73,18 @@ export default {
             timer: null,
             isScreenshot: false,
             scale: 100,
+            screenName: '画布屏幕',
         }
     },
-    computed: mapState([
-        'componentData',
-        'canvasStyleData',
-        'areaData',
-        'curComponent',
-        'curComponentIndex',
-    ]),
+    computed: mapState(['componentData', 'canvasStyleData', 'areaData', 'curComponent', 'curComponentIndex', 'isPhone']),
     created() {
         eventBus.$on('preview', this.preview)
         eventBus.$on('save', this.save)
         eventBus.$on('clearCanvas', this.clearCanvas)
 
+        this.scale = this.canvasStyleData.scale
+    },
+    updated() {
         this.scale = this.canvasStyleData.scale
     },
     methods: {
@@ -89,7 +93,7 @@ export default {
             this.timer = setTimeout(() => {
                 // 画布比例设一个最小值，不能为 0
                 // eslint-disable-next-line no-bitwise
-                this.scale = (~~this.scale) || 1
+                this.scale = ~~this.scale || 1
                 changeComponentsSizeWithScale(this.scale)
             }, 1000)
         },
@@ -97,7 +101,7 @@ export default {
         handleAceEditorChange() {
             this.isShowAceEditor = !this.isShowAceEditor
         },
-        
+
         closeEditor() {
             this.handleAceEditorChange()
         },
@@ -201,6 +205,26 @@ export default {
             this.isShowPreview = false
             this.$store.commit('setEditMode', 'edit')
         },
+        setScreenSize(screen = {}) {
+            this.$store.commit('setScreenSize', screen)
+            this.$store.commit('setIsPhone', screen.isPhone)
+        },
+        // 切换手机电脑屏幕
+        screenCategory(category) {
+            switch (category) {
+                case 'phone':
+                    this.screenName = '手机屏幕'
+
+                    this.setScreenSize({ height: 900, width: 540, scale: 80, isPhone: true })
+                    break
+
+                case 'pc':
+                    this.screenName = '电脑屏幕'
+                    this.setScreenSize({ height: 740, width: 1200, scale: 100, isPhone: false })
+                    break
+            }
+            // this.$message('click on item ' + category)
+        },
     },
 }
 </script>
@@ -212,6 +236,9 @@ export default {
     overflow-x: auto;
     background: #fff;
     border-bottom: 1px solid #ddd;
+    .dropdown {
+        margin-left: 15px;
+    }
 
     .canvas-config {
         display: inline-block;
@@ -246,7 +273,7 @@ export default {
         box-sizing: border-box;
         outline: 0;
         margin: 0;
-        transition: .1s;
+        transition: 0.1s;
         font-weight: 500;
         padding: 9px 15px;
         font-size: 12px;

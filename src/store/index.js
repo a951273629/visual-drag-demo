@@ -8,10 +8,12 @@ import event from './event'
 import layer from './layer'
 import snapshot from './snapshot'
 import lock from './lock'
+import { boolean } from 'mathjs'
 
 Vue.use(Vuex)
 
 const data = {
+    // 数据
     state: {
         ...animation.state,
         ...compose.state,
@@ -23,7 +25,8 @@ const data = {
         ...lock.state,
 
         editMode: 'edit', // 编辑器模式 edit preview
-        canvasStyleData: { // 页面全局数据
+        canvasStyleData: {
+            // 页面全局数据
             width: 1200,
             height: 740,
             scale: 100,
@@ -32,6 +35,7 @@ const data = {
             background: '#fff',
             fontSize: 14,
         },
+        isPhone: false, // 是否在手机中
         isInEdiotr: false, // 是否在编辑器中，用于判断复制、粘贴组件时是否生效，如果在编辑器外，则无视这些操作
         componentData: [], // 画布组件数据
         curComponent: null,
@@ -40,6 +44,7 @@ const data = {
         // 如果没点中组件，并且在画布空白处弹起鼠标，则取消当前组件的选中状态
         isClickComponent: false,
     },
+    //修改数据的 这里只分了两层
     mutations: {
         ...animation.mutations,
         ...compose.mutations,
@@ -49,7 +54,15 @@ const data = {
         ...layer.mutations,
         ...snapshot.mutations,
         ...lock.mutations,
-
+        // 更改手机模式的电脑貌似的屏幕大小
+        setScreenSize(state, value = Object) {
+            state.canvasStyleData.width = value.width
+            state.canvasStyleData.height = value.height
+            state.canvasStyleData.scale = value.scale
+        },
+        setIsPhone(state, value = boolean) {
+            state.isPhone = value
+        },
         aceSetCanvasData(state, value) {
             state.canvasStyleData = value
         },
