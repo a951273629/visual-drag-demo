@@ -10,7 +10,24 @@
             </label>
 
             <el-button type="primary" style="margin-left: 10px" @click="preview(false)">预览</el-button>
-            <el-button type="primary" @click="save">保存</el-button>
+
+            <!-- 保存代码 -->
+            <el-dropdown class="dropdown" size="small" split-button type="primary" @command="save">
+                导入\导出
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="local">导出到本地</el-dropdown-item>
+                    <el-dropdown-item command="server">导出到服务器</el-dropdown-item>
+                    <el-dropdown-item command="importLocal">本地导入</el-dropdown-item>
+                </el-dropdown-menu>
+                <input
+                    type="file"
+                    accept="application/json"
+                    style="visibility: hidden; height: 0px; width: 0px"
+                    ref="fileRead"
+                    @change="fileRead"
+                />
+            </el-dropdown>
+
             <el-button type="primary" @click="clearCanvas">清空画布</el-button>
             <el-button type="primary" :disabled="!areaData.components.length" @click="compose">组合</el-button>
             <el-button
@@ -40,10 +57,10 @@
                 <span>*</span>
                 <input v-model="canvasStyleData.height" />
             </div>
-            <div class="canvas-config">
+
+            <div class="slider">
                 <span>画布比例</span>
-                <input v-model="scale" @input="handleScaleChange" />
-                %
+                <el-slider class="canvas-slider" v-model="scale" show-input @change="handleScaleChange"></el-slider>
             </div>
         </div>
 
@@ -62,6 +79,7 @@ import AceEditor from '@/components/Editor/AceEditor.vue'
 import { commonStyle, commonAttr } from '@/custom-component/component-list'
 import eventBus from '@/utils/eventBus'
 import { $ } from '@/utils/utils'
+import { saveAs } from 'file-saver'
 import changeComponentsSizeWithScale, { changeComponentSizeWithScale } from '@/utils/changeComponentsSizeWithScale'
 
 export default {
@@ -84,9 +102,9 @@ export default {
 
         this.scale = this.canvasStyleData.scale
     },
-    updated() {
-        this.scale = this.canvasStyleData.scale
-    },
+    // updated() {
+    //     this.scale = this.canvasStyleData.scale
+    // },
     methods: {
         handleScaleChange() {
             clearTimeout(this.timer)
@@ -95,7 +113,7 @@ export default {
                 // eslint-disable-next-line no-bitwise
                 this.scale = ~~this.scale || 1
                 changeComponentsSizeWithScale(this.scale)
-            }, 1000)
+            }, 100)
         },
 
         handleAceEditorChange() {
@@ -188,13 +206,55 @@ export default {
             this.isShowPreview = true
             this.$store.commit('setEditMode', 'preview')
         },
+        // 保存到本地或者服务器
+        save(saveCategory) {
+            let componentDate = JSON.stringify({ canvasData: this.componentData, canvasStyle: this.canvasStyleData })
 
-        save() {
-            localStorage.setItem('canvasData', JSON.stringify(this.componentData))
-            localStorage.setItem('canvasStyle', JSON.stringify(this.canvasStyleData))
+            if (saveCategory === 'local') {
+                let file = new File([componentDate], 'Procode.json', { type: 'application/json' })
+                // 保存到本地
+                saveAs(file)
+            } else if (saveCategory === 'importLocal') {
+                this.importLocal()
+                return
+            } else {
+            }
             this.$message.success('保存成功')
         },
+        // 打卡选择文件的文件管理器
+        importLocal() {
+            this.$refs.fileRead.click()
+        },
+        // 本地数据导入到页面
+        async fileRead() {
+            let message = this.$message
+            let result = new Promise((resolve, reject) => {
+                const file = this.$refs.fileRead.files[0]
 
+                if (!file) {
+                    reject('没有选择任何文件')
+                }
+                let reader = new FileReader()
+                reader.readAsText(file)
+                reader.onload = function (evt) {
+                    const fileStr = evt.target.result
+                    if (fileStr) resolve(fileStr)
+                    else reject(evt)
+                }
+            })
+            // 使用async/await 这里的this就是Vue实例 加入用Promise.then那么这里的this是Promise
+            try {
+                let value = await result
+                let canvas = JSON.parse(value)
+                this.$store.commit('setCanvasData', canvas)
+                // this.canvasData = componentDate.canvasData
+                // this.canvasStyleData = componentDate.canvasStyle
+                message.success('读取成功')
+            } catch (err) {
+                console.log(err)
+                message.error(err)
+            }
+        },
         clearCanvas() {
             this.$store.commit('setCurComponent', { component: null, index: null })
             this.$store.commit('setComponentData', [])
@@ -206,6 +266,7 @@ export default {
             this.$store.commit('setEditMode', 'edit')
         },
         setScreenSize(screen = {}) {
+            this.scale = screen.scale
             this.$store.commit('setScreenSize', screen)
             this.$store.commit('setIsPhone', screen.isPhone)
         },
@@ -236,8 +297,32 @@ export default {
     overflow-x: auto;
     background: #fff;
     border-bottom: 1px solid #ddd;
+    position: relative;
+    .slider {
+        position: absolute;
+        top: 34%;
+        left: 60%;
+        transform: translateY(-47%);
+        display: inline-block;
+        margin-left: 50px;
+        width: 500px;
+        span {
+            position: absolute;
+            left: 13%;
+            display: inline-block;
+            font-size: 14px;
+            color: #606266;
+        }
+        .canvas-slider {
+            position: absolute;
+            left: 25%;
+            transform: translateY(-20%);
+            width: 400px;
+        }
+    }
     .dropdown {
         margin-left: 15px;
+        margin-right: 15px;
     }
 
     .canvas-config {

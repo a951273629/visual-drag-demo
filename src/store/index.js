@@ -113,7 +113,11 @@ const data = {
         setComponentData(state, componentData = []) {
             Vue.set(state, 'componentData', componentData)
         },
-
+        // { canvasData: this.componentData, canvasStyle: this.canvasStyleData }
+        setCanvasData(state, canvas) {
+            state.componentData = canvas.canvasData
+            state.canvasStyleData = canvas.canvasStyle
+        },
         addComponent(state, { component, index }) {
             if (index !== undefined) {
                 state.componentData.splice(index, 0, component)

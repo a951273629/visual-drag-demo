@@ -38,6 +38,8 @@ export default {
 <style lang="scss" scoped>
 .grid {
     position: absolute;
+    width: 100%;
+    height: 100%;
     top: 0;
     left: 0;
 }
@@ -50,14 +52,14 @@ export default {
     height: 100%;
     border: 1px solid #000;
     border-radius: 30px;
-    z-index: 1;
+    /* z-index: 1; */
 
     .inner-border {
         position: absolute;
         top: 49%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 95%;
+        width: 92%;
         height: 84%;
         border: 1px solid #000;
     }

@@ -26,10 +26,10 @@
                     <el-tab-pane label="属性" name="attr">
                         <component :is="curComponent.component + 'Attr'" />
                     </el-tab-pane>
-                    <el-tab-pane label="动画" name="animation" style="padding-top: 20px;">
+                    <el-tab-pane label="动画" name="animation" style="padding-top: 20px">
                         <AnimationList />
                     </el-tab-pane>
-                    <el-tab-pane label="事件" name="events" style="padding-top: 20px;">
+                    <el-tab-pane label="事件" name="events" style="padding-top: 20px">
                         <EventList />
                     </el-tab-pane>
                 </el-tabs>
@@ -63,13 +63,7 @@ export default {
             reSelectAnimateIndex: undefined,
         }
     },
-    computed: mapState([
-        'componentData',
-        'curComponent',
-        'isClickComponent',
-        'canvasStyleData',
-        'editor',
-    ]),
+    computed: mapState(['componentData', 'curComponent', 'isClickComponent', 'canvasStyleData', 'editor']),
     created() {
         this.restore()
         // 全局监听按键事件
@@ -91,11 +85,18 @@ export default {
         handleDrop(e) {
             e.preventDefault()
             e.stopPropagation()
-
-            const index = e.dataTransfer.getData('index')
+            // 拿到拖动元素的key值
+            const key = e.dataTransfer.getData('key')
             const rectInfo = this.editor.getBoundingClientRect()
-            if (index) {
-                const component = deepCopy(componentList[index])
+            if (key) {
+                let component = undefined
+                // 遍历获取到拖到画布上的 组件
+                componentList.forEach((item) => {
+                    if (item.component === key) {
+                        component = deepCopy(item)
+                    }
+                })
+
                 component.style.top = e.clientY - rectInfo.y
                 component.style.left = e.clientX - rectInfo.x
                 component.id = generateID()
