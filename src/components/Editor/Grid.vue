@@ -43,7 +43,6 @@ export default {
     top: 0;
     left: 0;
 }
-
 .external-border {
     position: absolute;
     top: 0;
@@ -52,7 +51,7 @@ export default {
     height: 100%;
     border: 1px solid #000;
     border-radius: 30px;
-    /* z-index: 1; */
+    background-color: #fff;
 
     .inner-border {
         position: absolute;
@@ -69,7 +68,7 @@ export default {
         justify-content: center;
         width: 95%;
         height: 8%;
-        bottom: 0;
+        bottom: 0.6%;
         left: 2.5%;
         border-radius: 40px;
         z-index: 0;

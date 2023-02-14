@@ -91,7 +91,7 @@ export default {
             timer: null,
             isScreenshot: false,
             scale: 100,
-            screenName: '画布屏幕',
+            screenName: '手机屏幕',
         }
     },
     computed: mapState(['componentData', 'canvasStyleData', 'areaData', 'curComponent', 'curComponentIndex', 'isPhone']),
@@ -247,8 +247,6 @@ export default {
                 let value = await result
                 let canvas = JSON.parse(value)
                 this.$store.commit('setCanvasData', canvas)
-                // this.canvasData = componentDate.canvasData
-                // this.canvasStyleData = componentDate.canvasStyle
                 message.success('读取成功')
             } catch (err) {
                 console.log(err)
@@ -276,7 +274,7 @@ export default {
                 case 'phone':
                     this.screenName = '手机屏幕'
 
-                    this.setScreenSize({ height: 900, width: 540, scale: 80, isPhone: true })
+                    this.setScreenSize({ height: 960, width: 540, scale: 80, isPhone: true })
                     break
 
                 case 'pc':
@@ -350,9 +348,9 @@ export default {
         line-height: 1;
         white-space: nowrap;
         cursor: pointer;
-        background: #fff;
+        background: #409eff;
         border: 1px solid #dcdfe6;
-        color: #606266;
+        color: #fff;
         appearance: none;
         text-align: center;
         box-sizing: border-box;
@@ -366,14 +364,14 @@ export default {
         margin-left: 10px;
 
         &:active {
-            color: #3a8ee6;
+            color: #ffffff;
             border-color: #3a8ee6;
             outline: 0;
         }
 
         &:hover {
-            background-color: #ecf5ff;
-            color: #3a8ee6;
+            background-color: #66b1ff;
+            color: #e6ffff;
         }
     }
 }

@@ -7,6 +7,7 @@ const routes = [
     {
         path: '/',
         name: 'Home',
+        // 路由懒加载
         component: () => import('@/views/Home'),
     },
 ]
